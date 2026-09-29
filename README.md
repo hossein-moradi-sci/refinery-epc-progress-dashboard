@@ -1,4 +1,4 @@
-<a id="en"></a>
+<a name="en"></a>
 
 # 🏗️ Construction Progress Dashboard — Refinery EPC
 
@@ -258,7 +258,7 @@ demonstration only — read [NOTICE.md](NOTICE.md) before reusing it.
 
 ---
 
-<a id="fa"></a>
+<a name="fa"></a>
 
 <div dir="rtl">
 
