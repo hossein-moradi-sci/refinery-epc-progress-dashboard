@@ -253,6 +253,6 @@ node tools/check-page.mjs
 
 ---
 
-🇬🇧 The same README in English: **[README.md](README.md)**
+🌐 این توضیحات به انگلیسی: **[README.md](README.md)**
 
 </div>

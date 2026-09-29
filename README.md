@@ -258,4 +258,4 @@ demonstration only — read [NOTICE.md](NOTICE.md) before reusing it.
 
 ---
 
-🇮🇷 همین توضیحات به فارسی: **[README.fa.md](README.fa.md)**
+🌐 نسخهٔ فارسی همین توضیحات: **[README.fa.md](README.fa.md)**
