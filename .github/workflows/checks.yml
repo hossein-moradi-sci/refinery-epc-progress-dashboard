@@ -1,0 +1,31 @@
+name: checks
+
+# The three tools that need no private input run here, so a reviewer can see them pass instead
+# of taking the README's word for it. `leak-check.mjs` is deliberately absent: its denylist is
+# the sensitive half of the anonymisation and lives only on the machine that owns the data
+# (see tools/README.md). `verify-progress.mjs` pins the shipped sample's baseline - if the
+# numbers in the repository change, this fails and says which one moved.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Progress maths still matches the baseline
+        run: node tools/verify-progress.mjs --expect "42.1,57.3,-15.1" --leaves 226 --milestones 19 --critical 14
+
+      - name: Power BI project, theme and project paths are intact
+        run: node tools/validate-json.mjs
+
+      - name: The offline page still parses
+        run: node tools/check-page.mjs

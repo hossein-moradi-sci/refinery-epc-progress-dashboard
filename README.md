@@ -2,6 +2,10 @@
 
 **MS Project → weighted itemised progress → Power BI + a zero-install offline web dashboard**
 
+[![checks](https://github.com/hossein-moradi-sci/refinery-epc-progress-dashboard/actions/workflows/checks.yml/badge.svg)](https://github.com/hossein-moradi-sci/refinery-epc-progress-dashboard/actions/workflows/checks.yml)
+[![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![data: anonymised](https://img.shields.io/badge/data-anonymised-informational.svg)](NOTICE.md)
+
 ![The offline dashboard, Persian, dark theme](docs/img/dashboard-dark.png)
 
 A project-controls toolkit for a refinery EPC package: it reads the schedule straight out of
@@ -109,7 +113,8 @@ checked against each other — see below.
 │   ├─ preview/server.mjs           the same static server in Node (dev/agent use)
 │   ├─ Scripts/                     exporter (PowerShell), launchers (C#), build script
 │   └─ README.md                    the original Persian operations manual
-├─ tools/                           anonymise · verify · leak-check  (see docs/)
+├─ tools/                           anonymise · verify · leak-check · validate · check-page
+├─ .github/workflows/checks.yml     the gates that run on every push
 └─ docs/                            architecture, decisions, portfolio text, screenshots
 ```
 
@@ -182,16 +187,28 @@ More of this, including the mistakes that produced the rules, is in
 
 ## How it is verified
 
-| Gate | Command | What it proves |
-|---|---|---|
-| Progress maths | `node tools/verify-progress.mjs --expect "42.1,57.3,-15.1" --leaves 226 --milestones 19` | the CSV still rolls up to the numbers the dashboard claims |
-| Anonymisation | `node tools/leak-check.mjs` | none of the source project's vocabulary survives anywhere in the tree (binaries included) |
-| Report/model integrity | `node tools/validate-json.mjs` | every `.json`/`.pbip` in the tree parses |
-| Page syntax | `node tools/check-page.mjs` | the page's single `<script>` block is valid JavaScript |
-| Launchers | `powershell -File Refinery8-FGR-Dashboard\Scripts\build-launchers.ps1 -OutDir .` | the `.cs` sources still compile with `csc.exe`, no SDK needed |
+Nothing here is taken on trust — every claim above has a command behind it, and the three that
+need no private input run in CI on each push (`.github/workflows/checks.yml`, the badge at the
+top of this file is that job):
 
-They replace the assurance that a CI system would give, without pretending to be one: there is
-no CI here (see *Next*), and the checks were run on every change during development.
+| Gate | Command | What it proves | CI |
+|---|---|---|---|
+| Progress maths | `node tools/verify-progress.mjs --expect "42.1,57.3,-15.1" --leaves 226 --milestones 19 --critical 14` | the CSV still rolls up to the numbers the dashboard claims, and Power BI's weight columns agree with the page's arithmetic | ✅ |
+| Report/model integrity | `node tools/validate-json.mjs` | every `.json`/`.pbip`/`.platform` parses, the custom theme is wired and shaped the way Power BI actually applies it, and the project paths resolve | ✅ |
+| Page syntax | `node tools/check-page.mjs` | the page has exactly one `<script>` block and it parses as JavaScript | ✅ |
+| Anonymisation | `node tools/leak-check.mjs` | none of the source project's vocabulary survives anywhere in the tree — binaries included | author-side |
+| Launchers | `powershell -File Refinery8-FGR-Dashboard\Scripts\build-launchers.ps1 -OutDir .` | the `.cs` sources still compile with the framework's `csc.exe`, no SDK needed | Windows |
+
+```bash
+# thirty seconds, from a fresh clone, no install:
+node tools/verify-progress.mjs --expect "42.1,57.3,-15.1" --leaves 226 --milestones 19 --critical 14
+node tools/validate-json.mjs
+node tools/check-page.mjs
+```
+
+The leak scan of course carries the vocabulary of the project it is protecting, so it is the one
+gate that stays on the machine that owns the data: `tools/README.md` explains the split, and
+`NOTICE.md` documents what the anonymisation did and the one leftover it consciously accepts.
 
 ## Limitations, honestly
 
@@ -202,8 +219,9 @@ no CI here (see *Next*), and the checks were run on every change during developm
 - **Manual refresh by design** (above), so "the number is stale" is a workflow property, not a bug.
 - **Windows-first.** The launchers and the exporter use MS Project COM and WinForms; the *page*
   itself is plain HTML/JS and would run anywhere it is served from.
-- **No CI yet.** The checks above are scriptable and deterministic, which is the next thing to
-  wire up.
+- **CI covers three of the five gates.** The leak scan and the launcher build cannot run on a
+  public runner: the first needs the private vocabulary, the second needs Windows and the .NET
+  Framework. Both are one command for the author and documented in `tools/README.md`.
 - **The offline page is not a Power BI replacement.** It reproduces the itemised maths, the
   S-curve and the slicers; the report is where the client-facing pages live.
 

@@ -2,34 +2,35 @@
 /**
  * anonymize-data.mjs — build a publishable dataset from a real MS Project export.
  *
- * The dashboard's export (`data/tasks.csv`) describes a real construction project:
- * its task names, disciplines, milestones and calendar are commercially sensitive.
- * This tool produces a **structurally identical** copy in which
+ * The dashboard's export (`data/tasks.csv`) describes a real construction project: its task
+ * names, disciplines, milestones and whole calendar are commercially sensitive. This tool
+ * produces a **structurally identical** copy in which
  *
  *   * every human-readable identifier is replaced through a rules file,
  *   * every date is shifted by a fixed number of days (durations are preserved),
  *   * `UniqueID` is renumbered sequentially (no link back to the source file),
  *   * the project-info timestamp is shifted with everything else,
  *
- * while the weights and progress percentages are kept (or, with `--perturb`,
- * jittered deterministically) so that all progress mathematics still holds and
- * the exported roll-ups stay internally consistent.
+ * while the weights and progress percentages are kept (or, with `--perturb`, jittered
+ * deterministically) so that every progress figure still holds and the two front ends stay
+ * internally consistent. The derived weight columns are recomputed whenever a percentage moves,
+ * because Power BI reads those columns while the page multiplies the percentages itself.
  *
- * The rules file holds the real vocabulary, so it is NEVER committed:
- * `tools/anonymize-rules.local.json` is listed in .gitignore. See
- * `tools/anonymize-rules.example.json` for the shape and run
+ * The rules file holds the real vocabulary, so it is never committed: the default path
+ * (`tools/anonymize-rules.local.json`) is listed in .gitignore.
+ * See `tools/anonymize-rules.example.json` for the shape and run
  *
  *   node tools/anonymize-data.mjs \
  *        --in  "C:/path/to/real/tasks.csv" \
- *        --out "app/data" \
+ *        --out "Refinery8-FGR-Dashboard/data" \
  *        --project-info "C:/path/to/real/project-info.csv"
  *
- * The tool refuses to write its output while any forbidden token (rules file,
- * `forbiddenTokens`) still appears in the transformed data, and always writes an
- * audit map of every rename it made (`--map`, default tools/name-map.local.json).
+ * The tool refuses to write while any forbidden token (rules file, `forbiddenTokens`) still
+ * appears in the transformed data, and always writes an audit map of every rename it made.
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
+import { parseCsv, toCsv, itemisedProgress } from './lib.mjs';
 
 // ---------------------------------------------------------------- arguments
 const args = process.argv.slice(2);
@@ -37,12 +38,11 @@ const opt = (name, dflt = null) => {
   const i = args.indexOf(`--${name}`);
   return i === -1 ? dflt : args[i + 1];
 };
-const has = (name) => args.includes(`--${name}`);
 
 const inCsv = opt('in');
 const outDir = opt('out', 'data');
-const rulesPath = opt('rules', 'tools/anonymize-rules.local.json');
-const mapPath = opt('map', 'tools/name-map.local.json');
+const rulesPath = opt('rules', path.join('tools', 'anonymize-rules.local.json'));
+const mapPath = opt('map', path.join('tools', 'name-map.local.json'));
 const projectInfoIn = opt('project-info');
 const offsetDaysArg = opt('offset-days');
 const perturbPp = Number(opt('perturb', '0'));
@@ -64,46 +64,7 @@ const offsetDays = offsetDaysArg === null ? Number(rules.dateOffsetDays || 0) : 
 const replacements = (rules.replacements || []).slice(); // order matters: most specific first
 const forbidden = (rules.forbiddenTokens || []).filter(Boolean);
 
-// ------------------------------------------------------------------- CSV I/O
-/** RFC-4180-ish line parser: handles quotes, escaped quotes and embedded commas. */
-function parseLine(line) {
-  const out = [];
-  let cur = '';
-  let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (inQ) {
-      if (c === '"') {
-        if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false;
-      } else cur += c;
-    } else if (c === '"') inQ = true;
-    else if (c === ',') { out.push(cur); cur = ''; }
-    else cur += c;
-  }
-  out.push(cur);
-  return out;
-}
-
-function parseCsv(text) {
-  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.length);
-  const head = parseLine(lines[0]);
-  const rows = lines.slice(1).map((l) => {
-    const cells = parseLine(l);
-    return Object.fromEntries(head.map((h, i) => [h, cells[i] ?? '']));
-  });
-  return { head, rows };
-}
-
-/** Mirrors PowerShell's Export-Csv: UTF-8 BOM, CRLF, every field quoted. */
-function toCsv(head, rows) {
-  const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const body = rows.map((r) => head.map((h) => q(r[h])).join(',')).join('\r\n');
-  return '\uFEFF' + head.map(q).join(',') + '\r\n' + body + '\r\n';
-}
-
 // ------------------------------------------------------------------- dates
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 /** Parses MS Project's `M/D/YYYY h:mm:ss AM/PM` without going through the host locale. */
 function parseMspDate(value) {
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)$/i.exec(String(value).trim());
@@ -160,10 +121,11 @@ const rand = () => {
 const jitter = (value, amplitude) => {
   if (!amplitude) return value;
   const n = Number(value);
-  if (!isFinite(n)) return value;
+  if (!Number.isFinite(n)) return value;
   const moved = Math.min(1, Math.max(0, n + (rand() * 2 - 1) * amplitude));
   return String(Math.round(moved * 1e4) / 1e4);
 };
+const round6 = (n) => String(Math.round(n * 1e6) / 1e6);
 
 const outRows = rows.map((row, index) => {
   const next = { ...row };
@@ -181,14 +143,13 @@ const outRows = rows.map((row, index) => {
   next.UniqueID = String(index + 1);
 
   if (perturbPp) {
-    // A jittered percentage must carry its derived weight columns with it, or the
-    // Power BI measures (which use the weights) would disagree with the page
-    // (which recomputes from the percentages).
+    // A jittered percentage must carry its derived weight columns with it, or Power BI (which
+    // sums the weights) would disagree with the page (which multiplies the percentages).
     next.PhysicalPercentComplete = jitter(next.PhysicalPercentComplete, perturbPp / 100);
     next.PlannedPercent = jitter(next.PlannedPercent, perturbPp / 100);
     const w = Number(next.WeightPercent) || 0;
-    next.ActualWeight = String(Math.round(w * (Number(next.PhysicalPercentComplete) || 0) * 1e6) / 1e6);
-    next.PlannedWeight = String(Math.round(w * (Number(next.PlannedPercent) || 0) * 1e6) / 1e6);
+    next.ActualWeight = round6(w * (Number(next.PhysicalPercentComplete) || 0));
+    next.PlannedWeight = round6(w * (Number(next.PlannedPercent) || 0));
   }
 
   return next;
@@ -225,6 +186,7 @@ if (projectInfoIn && existsSync(projectInfoIn)) {
 }
 
 const renamed = [...nameMap.entries()].filter(([a, b]) => a !== b);
+const unchanged = [...nameMap.entries()].filter(([a, b]) => a === b).map(([a]) => a);
 mkdirSync(path.dirname(mapPath), { recursive: true });
 writeFileSync(mapPath, JSON.stringify({
   generatedAt: new Date().toISOString(),
@@ -234,15 +196,10 @@ writeFileSync(mapPath, JSON.stringify({
   names: Object.fromEntries(renamed),
 }, null, 2), 'utf8');
 
-const unchanged = [...nameMap.entries()].filter(([a, b]) => a === b).map(([a]) => a);
-const leaves = outRows.filter((r) => r.IsMilestone !== 'True');
-const totalW = leaves.reduce((a, r) => a + (Number(r.WeightPercent) || 0), 0);
-const actual = leaves.reduce((a, r) => a + (Number(r.WeightPercent) || 0) * (Number(r.PhysicalPercentComplete) || 0), 0) / totalW * 100;
-const planned = leaves.reduce((a, r) => a + (Number(r.WeightPercent) || 0) * (Number(r.PlannedPercent) || 0), 0) / totalW * 100;
-
-console.log(`rows ${outRows.length}  leaves ${leaves.length}  milestones ${outRows.length - leaves.length}`);
-console.log(`actual ${actual.toFixed(1)}%  planned ${planned.toFixed(1)}%  variance ${(actual - planned).toFixed(1)}pp`);
-console.log(`status date ${outRows[0].StatusDate}  (offset ${offsetDays} days)`);
+const p = itemisedProgress(outRows);
+console.log(`rows ${p.rows}  leaves ${p.leaves}  milestones ${p.milestones}`);
+console.log(`actual ${p.actual.toFixed(1)}%  planned ${p.planned.toFixed(1)}%  variance ${p.variance.toFixed(1)}pp  SPI ${p.spi.toFixed(2)}`);
+console.log(`status date ${p.statusDate}  (offset ${offsetDays} days)`);
 console.log(`renamed ${renamed.length} distinct names -> ${mapPath}`);
 console.log(`wrote ${path.join(outDir, 'tasks.csv')}${infoNote}`);
 if (unchanged.length) {

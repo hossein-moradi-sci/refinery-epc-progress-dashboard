@@ -1,0 +1,10 @@
+# Text files are stored with LF and checked out with the platform's convention; without this,
+# the PowerShell/C# sources written on Windows show up as whole-file rewrites on any other
+# machine. The launcher binaries and the screenshots are marked so git never tries to merge or
+# diff them.
+* text=auto
+
+*.exe binary
+*.png binary
+*.pdf binary
+*.abf binary
