@@ -1,0 +1,14 @@
+# leak-check.mjs allow list - EXAMPLE ONLY.
+#
+# Copy to `tools/leak-allow.local.txt` (gitignored) and list the terms you have consciously
+# decided to publish anyway. Every other hit stays a hard failure.
+#
+# The copy this repository was built from accepts exactly one term, because Power BI Desktop
+# refuses to open a PBIP whose `<name>.Report` / `<name>.SemanticModel` folders do not match
+# the project's original name - so the artifact file names keep the source project's code
+# name while every displayed title, every task name and the whole calendar are replaced.
+# See NOTICE.md.
+#
+# One term per line, matched case-insensitively against the denylist term that hit.
+#
+# <project code name>

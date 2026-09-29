@@ -1,0 +1,22 @@
+# Power BI Desktop local state: absolute paths + a machine-bound signature, never shareable
+.pbi/
+*.abf
+*.pbix
+powerbi-path.txt
+
+# Run logs (created by the launchers and the exporter)
+logs/
+
+# The real schedule stays on the machine that runs the sync
+Project-File/*.mpp
+
+# Machine-only half of the anonymisation workflow: the vocabulary itself, the rename map,
+# the leak-scan denylist and the list of consciously accepted leftovers.
+# See tools/anonymize-data.mjs, tools/leak-check.mjs and NOTICE.md.
+tools/*.local.*
+
+# Scratch output and Office lock files
+*.tmp
+*.bak
+~$*
+.preview-*/

@@ -1,0 +1,22 @@
+table MSP_ProjectInfo
+	lineageTag: 11856d1b-3420-4a11-98c5-52207563e2b3
+
+	column RefreshedAt
+		dataType: dateTime
+		isHidden
+		lineageTag: dde1afea-7674-41a3-be4a-9e5541d9422b
+		summarizeBy: none
+		sourceColumn: RefreshedAt
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MSP_ProjectInfo = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "\project-info.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"RefreshedAt", type datetime}}, "en-US")
+				in
+				    Typed
+

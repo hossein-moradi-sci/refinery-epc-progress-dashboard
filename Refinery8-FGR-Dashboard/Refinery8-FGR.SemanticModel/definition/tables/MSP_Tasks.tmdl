@@ -1,0 +1,191 @@
+table MSP_Tasks
+	lineageTag: be452e6a-4db6-4b11-a575-de274e2ab05c
+
+	/// تاریخ به‌روزرسانی آخرین خروجی اتوماتیک از MS Project.
+	measure 'Refreshed At (Formatted)' = IF ( ISBLANK ( MAX ( MSP_ProjectInfo[RefreshedAt] ) ), "—", FORMAT ( MAX ( MSP_ProjectInfo[RefreshedAt] ), "yyyy/MM/dd HH:mm" ) )
+		formatString: General
+		lineageTag: ff0895e6-aa8b-4fcc-8475-0adba9ee913e
+
+	/// تاریخ وضعیت پروژه از MSP.
+	measure 'Status Date (Formatted)' = FORMAT ( MAX ( MSP_Tasks[StatusDate] ), "yyyy/MM/dd" )
+		formatString: General
+		lineageTag: 3a4d9d9d-07f0-473a-a879-a326ed37e40b
+
+	/// پیشرفت واقعی آیتمیک — جمع وزن تحقق‌یافته (وزن × Physical % Complete) تقسیم بر جمع وزن‌ها.
+	measure 'Progress (Item)' = DIVIDE ( SUM ( MSP_Tasks[ActualWeight] ), SUM ( MSP_Tasks[WeightPercent] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: e442ae8c-045a-4fd9-9045-2ee768708d37
+
+	/// پیشرفت برنامه‌ای آیتمیک — جمع وزن برنامه‌ای (وزن × Number3) تقسیم بر جمع وزن‌ها.
+	measure 'Planned Progress (Item)' = DIVIDE ( SUM ( MSP_Tasks[PlannedWeight] ), SUM ( MSP_Tasks[WeightPercent] ) )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: bf4cb20c-66d8-45ee-9aad-1dc2ceae762e
+
+	/// انحراف پیشرفت واقعی از برنامه‌ای.
+	measure 'Variance (Item)' = [Progress (Item)] - [Planned Progress (Item)]
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: 868e12bc-3b36-466b-a36a-b416345d741f
+
+	measure 'Weight (Total)' = SUM ( MSP_Tasks[WeightPercent] )
+		formatString: #,##0.00
+		lineageTag: 2b602503-7ba3-4100-85af-74fbdc4b1c5f
+
+	measure 'Actual Weight' = SUM ( MSP_Tasks[ActualWeight] )
+		formatString: #,##0.00
+		lineageTag: 7cd0055c-17a1-414c-92f0-26639d0e98fa
+
+	measure 'Days to Finish' = DATEDIFF ( MAX ( MSP_Tasks[StatusDate] ), MAX ( MSP_Tasks[Finish] ), DAY )
+		formatString: #,##0
+		lineageTag: e513e2ba-ca46-4187-b115-152a98930b31
+
+	/// تعداد نقاط عطف پروژه.
+	measure 'Milestones (Count)' = COUNTROWS ( Milestones )
+		formatString: #,##0
+		lineageTag: 203c8668-ae2d-4b7c-ae8a-fae5b3d3803b
+
+	/// تعداد نقاط عطف تکمیل‌شده.
+	/// زبان‌مستقل: روی خود درصد فیزیکی فیلتر می‌کند، نه روی برچسب فارسی.
+	measure 'Milestones Done' = CALCULATE ( COUNTROWS ( Milestones ), Milestones[PhysicalPercentComplete] >= 1 )
+		formatString: #,##0
+		lineageTag: e375afb6-76b2-40d8-808f-c3113559c532
+
+	column TaskName
+		dataType: string
+		lineageTag: 4789de43-36b1-4e40-98aa-936cc0b6ba29
+		summarizeBy: none
+		sourceColumn: TaskName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Phase
+		dataType: string
+		lineageTag: b2df1cee-3571-486c-bcea-1964cd3e76fb
+		summarizeBy: none
+		sourceColumn: Phase
+
+		annotation SummarizationSetBy = Automatic
+
+	column Disciplines
+		dataType: string
+		lineageTag: e6a6e4d1-df84-4d1f-aa86-a768df7a7961
+		summarizeBy: none
+		sourceColumn: Disciplines
+
+		annotation SummarizationSetBy = Automatic
+
+	column WBS
+		dataType: string
+		lineageTag: 5d794a9d-88a5-45f1-a636-f154b1df2bbc
+		summarizeBy: none
+		sourceColumn: WBS
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeightPercent
+		dataType: double
+		formatString: 0.00
+		lineageTag: 0f619cb1-d126-4b7f-9d43-24cd94dafb23
+		summarizeBy: sum
+		sourceColumn: WeightPercent
+
+		annotation SummarizationSetBy = Automatic
+
+	column PlannedWeight
+		dataType: double
+		formatString: 0.00
+		lineageTag: 5b4d25f2-fd98-4b6a-a8a7-ef2c250d7039
+		summarizeBy: sum
+		sourceColumn: PlannedWeight
+
+		annotation SummarizationSetBy = Automatic
+
+	column ActualWeight
+		dataType: double
+		formatString: 0.00
+		lineageTag: 7829ceac-c3db-497e-b22e-958d8ccb2f59
+		summarizeBy: sum
+		sourceColumn: ActualWeight
+
+		annotation SummarizationSetBy = Automatic
+
+	/// درصد برنامه‌ای آیتم از فایل MSP (فرمول Number3).
+	column PlannedPercent
+		dataType: double
+		formatString: 0%
+		lineageTag: 7e0a50b2-fc7c-4a3a-b24c-69f84435ef83
+		summarizeBy: none
+		sourceColumn: PlannedPercent
+
+		annotation SummarizationSetBy = Automatic
+
+	/// درصد واقعی آیتم از فایل MSP (برابر Physical % Complete روی آیتم‌ها).
+	column ActualPercent
+		dataType: string
+		lineageTag: f924fbdc-227d-4688-83e5-7dfbe4ea9c2c
+		summarizeBy: none
+		sourceColumn: ActualPercent
+
+		annotation SummarizationSetBy = Automatic
+
+	column Finish
+		dataType: dateTime
+		isHidden
+		formatString: yyyy/mm/dd
+		lineageTag: 7dde737d-7e2e-410b-8be3-75bade46c8fd
+		summarizeBy: none
+		sourceColumn: Finish
+
+		annotation SummarizationSetBy = Automatic
+
+	column StatusDate
+		dataType: dateTime
+		isHidden
+		lineageTag: 95d697f9-7686-4617-a8fb-1eaedff40ebf
+		summarizeBy: none
+		sourceColumn: StatusDate
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsInProgress
+		dataType: boolean
+		isHidden
+		lineageTag: a4d0b770-c449-4d01-8f15-be56ff47c30c
+		summarizeBy: none
+		sourceColumn: IsInProgress
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Weight Rank'
+		dataType: string
+		lineageTag: f47b1dc5-8af1-4baa-82bf-72eb4b2c3b2b
+		summarizeBy: none
+		sourceColumn: Weight Rank
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Status Category'
+		dataType: string
+		lineageTag: 987a2c41-3475-41cf-9b57-c4244e43a83e
+		summarizeBy: none
+		sourceColumn: Status Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MSP_Tasks = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "\tasks.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Filtered = Table.SelectRows(Promoted, each ([IsSummary] = "False" or [IsMilestone] = "True")),
+				    Typed = Table.TransformColumnTypes(Filtered, {{"WeightPercent", type number}, {"PlannedWeight", type number}, {"ActualWeight", type number}, {"Start", type datetime}, {"Finish", type datetime}, {"PhysicalPercentComplete", type number}, {"PlannedPercent", type number}, {"StatusDate", type datetime}}, "en-US"),
+				    AddedProgress = Table.AddColumn(Typed, "IsInProgress", each ([PhysicalPercentComplete] > 0 and [PhysicalPercentComplete] < 1)),
+				    TypedProgress = Table.TransformColumnTypes(AddedProgress, {{"IsInProgress", type logical}}),
+				    AddedActVal = Table.AddColumn(TypedProgress, "ActualPercentValue", each try Number.From([ActualPercent]) otherwise 0),
+				    TypedActVal = Table.TransformColumnTypes(AddedActVal, {{"ActualPercentValue", type number}}),
+				    AddedRank = Table.AddColumn(TypedActVal, "Weight Rank", (r) => if r[WeightPercent] = null or r[WeightPercent] <= 0 then null else List.Count(List.Select(TypedActVal[WeightPercent], (w) => w <> null and w > r[WeightPercent])) + 1),
+				    AddedCat = Table.AddColumn(AddedRank, "Status Category", each if [PlannedPercent] = 0 then "بدون برنامه" else if [ActualPercentValue] >= [PlannedPercent] then "در مسیر" else if [ActualPercentValue] > 0 then "عقب‌افتاده" else "شروع‌نشده"),
+				    Kept = Table.SelectColumns(AddedCat, {"TaskName", "Phase", "Disciplines", "WBS", "IsInProgress", "Weight Rank", "Status Category", "WeightPercent", "PlannedWeight", "ActualWeight", "PlannedPercent", "ActualPercent", "Finish", "StatusDate"})
+				in
+				    Kept
+

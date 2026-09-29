@@ -1,0 +1,20 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder","Milestones","MSP_Tasks","MSP_ProjectInfo"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table MSP_Tasks
+ref table Milestones
+ref table MSP_ProjectInfo
+
+ref cultureInfo en-US
+

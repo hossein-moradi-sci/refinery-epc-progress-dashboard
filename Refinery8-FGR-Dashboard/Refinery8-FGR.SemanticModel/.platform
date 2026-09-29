@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Refinery8-FGR"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "8c3a7d21-5b4e-4f6a-9c8d-1e2f3a4b5c6d"
+  }
+}

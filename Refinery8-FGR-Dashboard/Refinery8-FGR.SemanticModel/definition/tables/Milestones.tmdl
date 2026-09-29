@@ -1,0 +1,69 @@
+table Milestones
+	lineageTag: 23281c98-ff79-4bb8-a51f-d8c4249c3293
+
+	column UniqueID
+		dataType: string
+		isHidden
+		lineageTag: 086572ee-bfe7-41f2-9ad1-4743ec007e16
+		summarizeBy: none
+		sourceColumn: UniqueID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TaskName
+		dataType: string
+		lineageTag: cce8d1f0-ad26-4eb2-a242-ec251246ea1c
+		summarizeBy: none
+		sourceColumn: TaskName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Phase
+		dataType: string
+		lineageTag: a216ac8e-f130-48a9-af08-f474d08fafbb
+		summarizeBy: none
+		sourceColumn: Phase
+
+		annotation SummarizationSetBy = Automatic
+
+	column PhysicalPercentComplete
+		dataType: double
+		isHidden
+		formatString: 0%
+		lineageTag: 0495a528-b621-4287-8ff1-0a6b04e60a96
+		summarizeBy: none
+		sourceColumn: PhysicalPercentComplete
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Progress Category'
+		dataType: string
+		lineageTag: 7d7295d8-e26f-43f0-9de3-c79c7ba7623e
+		summarizeBy: none
+		sourceColumn: Progress Category
+
+		annotation SummarizationSetBy = Automatic
+
+	/// همان دسته‌بندی وضعیت، ولی با برچسب انگلیسی — صفحه‌های English از این ستون می‌خوانند.
+	column 'Progress Category EN'
+		dataType: string
+		lineageTag: 86d77324-f14e-4080-b077-6e61d3b4616f
+		summarizeBy: none
+		sourceColumn: Progress Category EN
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Milestones = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "\tasks.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Filtered = Table.SelectRows(Promoted, each ([IsMilestone] = "True")),
+				    Typed = Table.TransformColumnTypes(Filtered, {{"PhysicalPercentComplete", type number}, {"Start", type datetime}, {"StatusDate", type datetime}}, "en-US"),
+				    AddedCat = Table.AddColumn(Typed, "Progress Category", each if [PhysicalPercentComplete] >= 1 then "تکمیل‌شده" else if [PhysicalPercentComplete] > 0 then "در حال انجام" else if [Start] <> null and [StatusDate] <> null and [Start] < [StatusDate] then "دارای تأخیر" else "آینده"),
+				    AddedCatEn = Table.AddColumn(AddedCat, "Progress Category EN", each if [PhysicalPercentComplete] >= 1 then "Completed" else if [PhysicalPercentComplete] > 0 then "In Progress" else if [Start] <> null and [StatusDate] <> null and [Start] < [StatusDate] then "Late" else "Upcoming"),
+				    Kept = Table.SelectColumns(AddedCatEn, {"UniqueID", "TaskName", "Phase", "PhysicalPercentComplete", "Progress Category", "Progress Category EN"})
+				in
+				    Kept
+

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Refinery8-FGR Dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "9d4b8e32-6c5f-4a7b-ad9e-2f3a4b5c6d7e"
+  }
+}

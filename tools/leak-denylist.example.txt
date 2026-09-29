@@ -1,0 +1,19 @@
+# leak-check.mjs denylist — EXAMPLE ONLY.
+#
+# Copy this file to `tools/leak-denylist.local.txt` and replace every line below with the
+# identifiers that must never appear in a published copy of *your* project: the project and
+# client names, plant/unit names, site names, equipment tags, contract wording and any
+# distinctive numbers. One term per line; lines starting with # are ignored; matching is
+# case-insensitive.
+#
+# `tools/leak-denylist.local.txt` is listed in .gitignore on purpose: the list of words this
+# tool hunts for is itself sensitive, so it stays on the machine that built the copy.
+#
+# Then run:   node tools/leak-check.mjs
+#
+# <project code name>
+# <client name>
+# <site or area name>
+# <plant unit / train name>
+# <equipment tag prefix>
+# <contract / package number>
