@@ -1,4 +1,4 @@
-# 🏗️ Construction Progress Dashboard — Refinery EPC
+# 🏗️ Refinery EPC Progress Dashboard
 
 **MS Project → weighted itemised progress → Power BI + a zero-install offline dashboard**
 
@@ -13,17 +13,28 @@
 
 ![The offline dashboard — Persian UI, dark theme](docs/img/dashboard-dark.png)
 
-This project was commissioned by the maintenance supervisor of a refinery and delivered end to
-end. It reads the schedule straight out of MS Project, boils it down to one small CSV, and drives
-**two completely independent front ends** from that single file: a four-page Power BI report, and
-a one-file web dashboard that opens on a machine with nothing installed on it.
+Progress control for a **refinery EPC package** — commissioned by the plant's maintenance
+supervisor and delivered end to end. It reads the schedule straight out of MS Project, boils it
+down to one small CSV, and that single file drives **two completely independent front ends**: a
+four-page Power BI report, and a one-file web dashboard that opens on a machine with nothing
+installed.
 
-The figure it shows is the **weighted itemised** progress a planner actually signs off — not an
-average of task percentages — and it lands within **0.15 pp** of MS Project's own roll-up.
+The figure on screen is the **weighted itemised** progress a planner signs off — not an average of
+task percentages — and it lands within **0.15 pp** of MS Project's own roll-up.
+
+## ✨ What you get
+
+- 📂 **One source of truth** — MS Project → one CSV → both front ends, so the views cannot drift apart
+- 📊 **Four-page bilingual Power BI report** — 28 visuals, 10 hand-written DAX measures, FA + EN
+- 🌐 **Zero-install offline dashboard** — a single HTML file; no Power BI, no Node, no internet, runs from a USB stick
+- 🔽 **Drill-down** over the whole page or inside one chart, slicers, two-period comparison
+- 📅 **Look-ahead** for the next 7 / 14 / 30 days, critical path, SPI at a glance
+- 🖨️ **One-page A4 meeting sheet** on `P` / `Ctrl+P`, seven colour themes, Persian + English
+- 🔄 **Manual refresh, by design** — numbers move only when you press *Update from MS Project*
 
 > ⚠️ **About the data — the shipped dataset is anonymised.**
-> This repo was extracted from a real construction project. Every task name, discipline, milestone,
-> project title and date in `data/` was replaced with a generated equivalent by
+> This repo was extracted from a real project at a refinery. Every task name, discipline,
+> milestone, project title and date in `data/` was replaced with a generated equivalent by
 > `tools/anonymize-data.mjs`, and the whole calendar is shifted. The weights and percentages are
 > the project's own, which is what makes the numbers below real instead of invented. The `.mpp`,
 > the real export, and the vocabulary used to anonymise them are **not** published.
@@ -45,7 +56,7 @@ average of task percentages — and it lands within **0.15 pp** of MS Project's 
 
 ## 🤔 Why it exists
 
-Progress on a construction package is never a plain average of task percentages. It is a
+Progress on a refinery EPC package is never a plain average of task percentages. It is a
 **weighted** roll-up: a 0.2 %-weight instrument cable should not count as much as a 6 %-weight
 compressor, and in MS Project it does not.
 
@@ -66,10 +77,13 @@ places:
 
 | Power BI — overview (FA) | Power BI — item details (FA) |
 |---|---|
-| ![Power BI overview](docs/img/pbi-page1-dashboard-fa.png) | ![Power BI details](docs/img/pbi-page2-details-fa.png) |
+| ![Power BI overview](docs/img/pbi-page1-dashboard-fa.png) | ![Power BI item details](docs/img/pbi-page2-details-fa.png) |
 
-Full-page capture: [`docs/img/dashboard-full.png`](docs/img/dashboard-full.png) ·
-English report pages: [`pbi-page3`](docs/img/pbi-page3-dashboard-en.png) / [`pbi-page4`](docs/img/pbi-page4-details-en.png)
+| Power BI — overview (EN) | Power BI — item details (EN) |
+|---|---|
+| ![Power BI overview EN](docs/img/pbi-page3-dashboard-en.png) | ![Power BI item details EN](docs/img/pbi-page4-details-en.png) |
+
+Full-page capture: [`docs/img/dashboard-full.png`](docs/img/dashboard-full.png)
 
 ## 🧩 How the pieces fit
 
@@ -105,7 +119,7 @@ tables and the page in the same commit; that constraint is written down in
 
 The model does this in DAX from `ActualWeight` / `PlannedWeight`; the page and
 `tools/verify-progress.mjs` recompute it from `WeightPercent` × the percentages. Both paths are
-checked against each other — that is the point of the verifier below.
+checked against each other — that is what the verifier is for.
 
 ## 📁 What's where
 
@@ -139,11 +153,11 @@ checked against each other — that is the point of the verifier below.
 2. It serves the page on http://127.0.0.1:8642 and opens your browser.
 ```
 
-The page comes up in Persian with an EN switch, seven colour themes, slicers, drill-down (global
+The page comes up in Persian with an EN switch, seven colour themes, filters, drill-down (global
 and per-chart), a chart picker, period comparison, look-ahead, a virtualised item table, and an
 A4 meeting sheet on `P` / `Ctrl+P`. It needs **no** Power BI, **no** Node, **no** internet.
 
-Nothing in it runs on a timer, on purpose: the numbers only move when you press
+Nothing runs on a timer, on purpose: the numbers only move when you press
 **«به‌روزرسانی از MS Project»**, which runs the exporter hidden and reloads the page.
 
 **The Power BI report**
@@ -164,8 +178,8 @@ Nothing in it runs on a timer, on purpose: the numbers only move when you press
 ```
 
 The workflow is **manual by design**. There is no Windows task, service or watcher anywhere in
-this project, because a construction team that sees a window appear by itself stops trusting the
-numbers. The cadence is the file motion between engineers, not a timer.
+this project: a project team that sees a window appear by itself stops trusting the numbers. The
+cadence is the file motion between engineers, not a timer.
 
 ## 🛠️ What was actually hard
 
@@ -200,8 +214,9 @@ More of this, including the mistakes that produced those rules, is in
 
 ## ✅ Check it yourself
 
-Nothing here asks to be taken on trust. Every claim above has a command behind it, and the three
-that need no private data run in CI on each push — that is the badge at the top of this file.
+You don't have to take any of the above on trust — every claim has a command behind it. Three of
+them need no private data and run on every push; that is what the green badge at the top of this
+file means.
 
 | Gate | Command | What it proves | CI |
 |---|---|---|---|
@@ -240,12 +255,14 @@ it consciously accepts.
 ## 🧑‍💻 How I built it
 
 I am an electrical power engineer, not a software engineer. The commission came from the
-maintenance supervisor of a refinery — the name stays out of this repo — and I delivered it end
-to end. I specified this tool, I own its domain logic — the weighted roll-up, the look-ahead
-window, what SPI does and does not mean — I checked every number against MS Project, and I
-tested it on Windows across all three paths: USB stick, Power BI, offline page. The code itself was written in **AI-assisted** sessions under my
-direction. That is also the honest reason this repo carries so much written-down reasoning and a
-`tools/` folder: the verification had to be something I could run and read myself.
+maintenance supervisor of a refinery — the name stays out of this repo — and I delivered it end to
+end: I specified the tool, I own its domain logic (the weighted roll-up, the look-ahead window,
+what SPI does and does not mean), I checked every number against MS Project, and I tested all
+three paths on Windows — USB stick, Power BI, offline page.
+
+Every figure in this README can be re-derived with one command from `tools/`, and `docs/` holds
+the decisions and the mistakes behind them. For a progress number the only acceptable answer is
+*"run it yourself"*, so that is what the repo is built around.
 
 **Reviewing this?** The parts worth poking at are the weighted roll-up, why the S-curve is pinned
 at both ends, why the donut filters instead of drilling, and why the sync is manual.
@@ -255,8 +272,8 @@ at both ends, why the donut filters instead of drilling, and why the sync is man
 Code: [MIT](LICENSE). The sample dataset is derived from a real project and is published for
 demonstration only — read [NOTICE.md](NOTICE.md) before reusing it.
 
-**Eng. Hossein Moradi** — power/electrical technology engineer, construction project controls.
+**Eng. Hossein Moradi** — power electrical technology engineer · planning & project control
 
 ---
 
-🌐 نسخهٔ فارسی همین توضیحات: **[README.fa.md](README.fa.md)**
+🌐 Same README in Persian: **[README.fa.md](README.fa.md)**
