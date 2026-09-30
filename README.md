@@ -13,10 +13,10 @@
 
 ![The offline dashboard — Persian UI, dark theme](docs/img/dashboard-dark.png)
 
-I build progress-control tooling for construction projects. This one reads the schedule straight
-out of MS Project, boils it down to one small CSV, and drives **two completely independent front
-ends** from that single file: a four-page Power BI report, and a one-file web dashboard that opens
-on a machine with nothing installed on it.
+This project was commissioned by the maintenance supervisor of a refinery and delivered end to
+end. It reads the schedule straight out of MS Project, boils it down to one small CSV, and drives
+**two completely independent front ends** from that single file: a four-page Power BI report, and
+a one-file web dashboard that opens on a machine with nothing installed on it.
 
 The figure it shows is the **weighted itemised** progress a planner actually signs off — not an
 average of task percentages — and it lands within **0.15 pp** of MS Project's own roll-up.
@@ -239,10 +239,11 @@ it consciously accepts.
 
 ## 🧑‍💻 How I built it
 
-I am an electrical power engineer, not a software engineer. I specified this tool, I own its
-domain logic — the weighted roll-up, the look-ahead window, what SPI does and does not mean — I
-checked every number against MS Project, and I tested it on Windows across all three paths: USB
-stick, Power BI, offline page. The code itself was written in **AI-assisted** sessions under my
+I am an electrical power engineer, not a software engineer. The commission came from the
+maintenance supervisor of a refinery — the name stays out of this repo — and I delivered it end
+to end. I specified this tool, I own its domain logic — the weighted roll-up, the look-ahead
+window, what SPI does and does not mean — I checked every number against MS Project, and I
+tested it on Windows across all three paths: USB stick, Power BI, offline page. The code itself was written in **AI-assisted** sessions under my
 direction. That is also the honest reason this repo carries so much written-down reasoning and a
 `tools/` folder: the verification had to be something I could run and read myself.
 
