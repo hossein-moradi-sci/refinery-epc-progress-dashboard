@@ -2,7 +2,7 @@
 /**
  * anonymize-data.mjs — build a publishable dataset from a real MS Project export.
  *
- * The dashboard's export (`data/tasks.csv`) describes a real construction project: its task
+ * The dashboard's export (`data/tasks.csv`) describes a real refinery EPC project: its task
  * names, disciplines, milestones and whole calendar are commercially sensitive. This tool
  * produces a **structurally identical** copy in which
  *

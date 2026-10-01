@@ -1,6 +1,6 @@
 # NOTICE — provenance of the published data
 
-This repository is an extract of a **real construction progress-control system** for a refinery
+This repository is an extract of a **real progress-control system** for a refinery
 EPC package. The system itself is published as-is; the project's *data* is not, and neither is
 the vocabulary that identifies it. This file documents exactly what was changed, what was kept,
 and what deliberately still carries the project's code name, so that nobody has to guess.
@@ -68,7 +68,7 @@ add-in description) was replaced with neutral wording, and one manual line that 
 
 ## Rights, permission and no warranty
 
-The construction schedule and everything derived from it belong to the project and its owner.
+The project schedule and everything derived from it belong to the project and its owner.
 It is published here **for demonstration of the tooling**, after removing the identifying
 content described above, and it is the author's responsibility — not the reader's — to keep it
 that way. If you are the owner and you want any part of it removed, that request will be honoured
