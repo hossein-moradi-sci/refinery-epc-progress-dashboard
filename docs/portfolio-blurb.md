@@ -120,7 +120,7 @@ the project in this repository and uses its real figures — only the links need
 
 | Question | Your answer in one line |
 |---|---|
-| Why weighted progress instead of the average of task percentages? | A 0.14 %-weight item must not outvote a 6 %-weight one; MS Project already rolls up weight × % and the dashboard has to say the same thing. |
+| Why weighted progress instead of the average of task percentages? | A 0.03 %-weight item must not outvote a 5.8 %-weight one; MS Project already rolls up weight × % and the dashboard has to say the same thing. |
 | How do you know your numbers are right? | `tools/verify-progress.mjs` recomputes them from the raw CSV, independently of DAX and of the page, and the result matches MS Project's summary within 0.15 pp. |
 | What does the SPI you show actually tell me? | Schedule performance only: work done over work that should be done by the status date. Above 1 is ahead. There is no cost data in the export, so there is deliberately no CPI. |
 | Why is the sync manual? | The user read a scheduled sync as "something is running on my machine" and stopped trusting the numbers. Trust was worth more than the automation. |

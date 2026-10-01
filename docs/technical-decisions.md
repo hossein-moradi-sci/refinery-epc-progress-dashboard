@@ -6,7 +6,7 @@ problem, the decision, and what it cost to learn.
 ## 1. Why the progress figure is a weighted mean, not an average
 
 **Problem.** A package has 226 leaf items whose importance differs by two orders of magnitude
-(0.14 % to ~6 %). Averaging their percentages would let a cable pull outvote a compressor.
+(0.03 % to 5.78 %). Averaging their percentages would let a cable pull outvote a compressor.
 
 **Decision.** Reproduce MS Project's own roll-up instead of inventing a second one:
 

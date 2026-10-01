@@ -57,7 +57,7 @@ task percentages — and it lands within **0.15 pp** of MS Project's own roll-up
 ## 🤔 Why it exists
 
 Progress on a refinery EPC package is never a plain average of task percentages. It is a
-**weighted** roll-up: a 0.2 %-weight instrument cable should not count as much as a 6 %-weight
+**weighted** roll-up: a 0.2 %-weight cable should not count as much as a 5.8 %-weight
 compressor, and in MS Project it does not.
 
 The catch is that MS Project works that out with its own internal formula columns. One
@@ -272,7 +272,7 @@ at both ends, why the donut filters instead of drilling, and why the sync is man
 Code: [MIT](LICENSE). The sample dataset is derived from a real project and is published for
 demonstration only — read [NOTICE.md](NOTICE.md) before reusing it.
 
-**Eng. Hossein Moradi** — power electrical technology engineer · planning & project control
+**Eng. Hossein Moradi** — electrical power engineer · planning & project control
 
 ---
 
