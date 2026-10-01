@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="README.md"><img alt="English" src="https://img.shields.io/badge/English-0969da?style=for-the-badge"></a>
-  <a href="README.fa.md"><img alt="فارسی" src="https://img.shields.io/badge/%D9%81%D8%A7%D8%B1%D8%B3%DB%8C-2ea043?style=for-the-badge"></a>
+  <a href="README.fa.md"><img alt="فارسی" src="docs/img/badge-fa.svg"></a>
 </p>
 
 ![The offline dashboard — Persian UI, dark theme](docs/img/dashboard-dark.png)
